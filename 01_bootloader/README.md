@@ -23,4 +23,8 @@ $ nasm name_of_file.asm -f bin -o output.bin
 $ qemu output.bin
 ```
 
+# Display the binary code in hexadecimal format
 
+```
+$ od -t x1 -A n output.bin
+```
