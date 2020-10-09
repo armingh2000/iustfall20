@@ -8,6 +8,13 @@ mov sp, bp
 
 mov bx, boot_msg
 call print_string
+call print_newline
+mov bx, hex_msg
+call print_string
+call print_newline
+mov dx, 0xa91f
+call print_hex
+
 
 
 jmp $
@@ -18,6 +25,8 @@ jmp $
 boot_msg:
 	db "Booting loader", 0
 
+hex_msg:
+    db "printing a hex message", 0
 
 
 
