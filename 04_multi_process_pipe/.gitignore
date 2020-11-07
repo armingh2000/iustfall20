@@ -1,0 +1,3 @@
+data/*.dat
+data/res.txt
+*.o
