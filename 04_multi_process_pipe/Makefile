@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -Werror -O3
-OBJECTS = single_proc.o multi_proc.o
+CFLAGS = -Wall -O3 -lpthread
+OBJECTS = single_proc.o multi_proc.o multi_thread.o
 
 default: $(OBJECTS)
 
