@@ -26,7 +26,7 @@ typedef struct {
     int *queue;
     int head;
     int tail;
-    int size;
+    volatile int size;
     int capacity;
 } ring_buf_t;
 
@@ -94,8 +94,6 @@ int ring_buf_pop(ring_buf_t *ring, int *value)
 // =============================================================
 
 typedef struct {
-    int from;
-    int up_to;
     ring_buf_t **rings;
 } producer_arg_t;
 
@@ -119,27 +117,25 @@ int mod(long int num, int m)
 void *producer(void *_arg)
 {
     producer_arg_t *arg = _arg;
-    int from_file = arg->from;
-    int up_to_file = arg->up_to;
     ring_buf_t **rings = arg->rings;
-    FILE *fd;
-    char file_path[MAX_FILE_PATH_LEN];
-    int input;
     int i, j;
     int rc;
+    long int sum = 0;
 
     // iterat over files in data directory
-    for (i = 0; i < 1000; i++) {
+    for (i = 0; i < 100000; i++) {
         // read data from file
         do {
-            rc = 1;
             for (j = 0; j < COUNT_WORK_QUEUES; j++) {
                 // write data to work queues in a round robin fashion
-                    rc = ring_buf_push(rings[j], i);
+                rc = ring_buf_push(rings[j], i);
+                if (rc == 0) break;
             }
         } while(rc != 0);
+        sum += i;
+        sum = mod(sum, M);
     }
-    printf("producer finished its job\n");
+    printf("producer finished its job (ans: %ld)\n", sum);
     pthread_exit(NULL);
 }
 
@@ -165,7 +161,6 @@ int main(int argc, char *argv[])
 {
     const int count_threads = 10;
     assert (count_threads > 1);
-    int count_files = 100;
 
     pthread_t threads[count_threads];
     producer_arg_t p_arg;
@@ -180,8 +175,6 @@ int main(int argc, char *argv[])
     long int total_time;
 
     // set producer thread arguments
-    p_arg.from = 0;
-    p_arg.up_to = count_files;
     p_arg.rings = malloc(COUNT_WORK_QUEUES * sizeof(ring_buf_t));
     for (i = 0; i < COUNT_WORK_QUEUES; i++) {
         p_arg.rings[i] = new_ring_buf(MAX_SIZE_WORK_QUEUES);
@@ -200,7 +193,7 @@ int main(int argc, char *argv[])
             printf("failed to create a thread\n");
         }
 
-        printf("consumer thread %d\n", i);
+        // printf("consumer thread %d\n", i);
     }
 
     // create producer thread
@@ -210,15 +203,18 @@ int main(int argc, char *argv[])
         printf("failed to create producer thread\n");
         return -1;
     }
-    printf("producer thread created\n");
+    // printf("producer thread created\n");
 
     // wait until threads do the job
     pthread_join(threads[count_threads - 1], NULL);
     for (i = 0; i < count_threads - 1; i++) {
+        while (p_arg.rings[i % COUNT_WORK_QUEUES]->size > 0) {
+            // printf("thread %d: size: %d\n", i, p_arg.rings[i % COUNT_WORK_QUEUES]->size);
+        }
         c_args[i].run = 0;
         pthread_join(threads[i], NULL);
     }
-    printf("workers are done\n");
+    // printf("workers are done\n");
 
     for (i = 0; i < count_threads - 1; i++) {
         child_return = c_args[i].result;
