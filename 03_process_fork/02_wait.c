@@ -18,6 +18,10 @@ int main (int argc, char *argv[])
 		// Child Process
 		printf("Hello World, I am child process. My pid is: %d\n", getpid());
 
+		for (int i = 0; i < 10; i++){
+		    printf("number: %d\n", i);
+		}
+
 	} else{
 		// Parent Process
 		int w = wait(NULL);
