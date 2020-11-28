@@ -6,6 +6,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 
 #define PORT 8000
@@ -33,7 +35,7 @@ int main (void)
     address.sin_port = PORT;
 
     // time to bind!
-    if (bind(server_fd, &address, sizeof(address)) < 0)
+    if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0)
     {
         printf("bind failed\n");
         exit(-1);
@@ -46,7 +48,7 @@ int main (void)
     }
 
     printf("waiting for a client ...\n");
-    if ((client_fd = accept(server_fd, &address, &addrlen)) < 0)
+    if ((client_fd = accept(server_fd, (struct sockaddr*)&address, &addrlen)) < 0)
     {
         printf("accept failed!\n");
         exit(-1);
