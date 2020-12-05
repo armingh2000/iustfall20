@@ -25,6 +25,7 @@ void * worker_func(void * _arg) {
 	write(new_socket , hello , strlen(hello));
 	printf("-------------Hello message sent---------------\n");
 	close(new_socket);
+	pthread_exit(NULL);
 }
 
 int main(int argc, char const *argv[])
