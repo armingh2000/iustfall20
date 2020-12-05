@@ -19,7 +19,7 @@ int main (int argc, char *argv[])
 		printf("Hello World, I am child process. My pid is: %d\n", getpid());
 		char *my_args[3];
 		my_args[0] = strdup("./script.sh");
-		my_args[1] = strdup("Hello from Bash!");
+		my_args[1] = strdup("Hello to OS class!");
 		my_args[2] = NULL; 		// Indicating end of array
 		execvp(my_args[0], my_args);
 
